@@ -3,34 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Берсерк. Герои — Коллекция и Колоды</title>
+    <title>Берсерк. Герои — Коллекция</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>⚔️ Берсерк. Герои</h1>
-        <p>Каталог карт и конструктор колод</p>
-    </header>
+    <h1>Коллекция карт «Берсерк. Герои»</h1>
 
-    <main class="container">
-        <!-- Поиск и фильтры -->
-        <div class="filters">
-            <input type="text" id="searchInput" placeholder="Поиск карты по названию..." />
-            <select id="elementFilter">
-                <option value="all">Все стихии</option>
-                <option value="Степь">Степь</option>
-                <option value="Горы">Горы</option>
-                <option value="Лес">Лес</option>
-                <option value="Тьма">Тьма</option>
-                <option value="Болото">Болото</option>
-                <option value="Нейтральная">Нейтральная</option>
-            </select>
-        </div>
+    <!-- Панель фильтров -->
+    <div class="filters">
+        <select id="set-filter">
+            <option value="">Все выпуски (сеты)</option>
+        </select>
+        <input type="text" id="search-input" placeholder="Поиск по названию...">
+    </div>
 
-        <!-- Контейнер, куда будут выводиться карточки -->
-        <div id="cardsGrid" class="cards-grid"></div>
-    </main>
+    <!-- Контейнер для вывода карточек -->
+    <div id="cards-container"></div>
 
     <script src="script.js"></script>
 </body>

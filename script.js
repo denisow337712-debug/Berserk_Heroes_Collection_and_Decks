@@ -1,56 +1,77 @@
-// Небольшая тестовая база карт «Берсерк. Герои»
-const cardsDatabase = [
-    { id: 1, name: "Свирепый гарпунщик", element: "Степь", type: "Существо", cost: 3, text: "Нападка. При атаке наносит 1 дополнительный урон." },
-    { id: 2, name: "Лесной стрелок", element: "Лес", type: "Существо", cost: 2, text: "Выстрел на 2." },
-    { id: 3, name: "Горный страж", element: "Горы", type: "Существо", cost: 4, text: "Броня 1. Страж." },
-    { id: 4, name: "Теневой ассасин", element: "Тьма", type: "Существо", cost: 3, text: "Удар из тени." },
-    { id: 5, name: "Болотный змей", element: "Болото", type: "Существо", cost: 5,text: "Отражение яда." },
-    { id: 6, name: "Золотая монета", element: "Нейтральная", type: "Экипировка", cost: 0, text: "Дает +1 золото при розыгрыше." }
-];
+let allCards = [];
 
-const cardsGrid = document.getElementById('cardsGrid');
-const searchInput = document.getElementById('searchInput');
-const elementFilter = document.getElementById('elementFilter');
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('cards.json')
+        .then(response => response.json())
+        .then(data => {
+            allCards = data;
+            console.log(`Загружено карт: ${allCards.length}`);
+            populateFilters();
+            displayCards(allCards);
+            setupListeners();
+        })
+        .catch(error => console.error('Ошибка загрузки базы карт:', error));
+});
 
-// Функция отрисовки карточек на экране
-function renderCards(cardsToRender) {
-    cardsGrid.innerHTML = '';
+function populateFilters() {
+    const setFilter = document.getElementById('set-filter');
+    if (!setFilter) return;
+
+    const sets = [...new Set(allCards.map(card => card.set))];
     
+    sets.forEach(setName => {
+        const option = document.createElement('option');
+        option.value = setName;
+        option.textContent = setName;
+        setFilter.appendChild(option);
+    });
+}
+
+function setupListeners() {
+    const setFilter = document.getElementById('set-filter');
+    const searchInput = document.getElementById('search-input');
+
+    const filterHandler = () => {
+        const selectedSet = setFilter.value;
+        const searchQuery = searchInput.value.toLowerCase().trim();
+
+        const filtered = allCards.filter(card => {
+            const matchesSet = !selectedSet || card.set === selectedSet;
+            const matchesSearch = card.name.toLowerCase().includes(searchQuery);
+            return matchesSet && matchesSearch;
+        });
+
+        displayCards(filtered);
+    };
+
+    setFilter.addEventListener('change', filterHandler);
+    searchInput.addEventListener('input', filterHandler);
+}
+
+function displayCards(cardsToRender) {
+    const container = document.getElementById('cards-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+
     if (cardsToRender.length === 0) {
-        cardsGrid.innerHTML = '<p>Карты не найдены...</p>';
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Карты не найдены</p>';
         return;
     }
 
-    cardsToRender.forEach(card => {
-        const cardElement = document.createElement('div');
-        cardElement.classList.add('card');
-        cardElement.innerHTML = `
+    // Выводим первые 100 подходящих карт (для быстрой работы интерфейса)
+    const sliceCards = cardsToRender.slice(0, 100);
+
+    sliceCards.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card-item';
+        cardEl.innerHTML = `
             <h3>${card.name}</h3>
-            <p><strong>Стихия:</strong> ${card.element}</p>
-            <p><strong>Тип:</strong> ${card.type} (Монет: ${card.cost})</p>
-            <p>${card.text}</p>
+            <p><strong>Сет:</strong> ${card.set}</p>
+            <p><strong>Стихия:</strong> ${card.element || 'Нейтральная'}</p>
+            <p><strong>Стоимость:</strong> ${card.cost} зол.</p>
+            <p><strong>Редкость:</strong> ${card.rarity}</p>
         `;
-        cardsGrid.appendChild(cardElement);
+        container.appendChild(cardEl);
     });
 }
-
-// Функция фильтрации и поиска
-function filterCards() {
-    const searchText = searchInput.value.toLowerCase();
-    const selectedElement = elementFilter.value;
-
-    const filtered = cardsDatabase.filter(card => {
-        const matchesSearch = card.name.toLowerCase().includes(searchText);
-        const matchesElement = (selectedElement === 'all' || card.element === selectedElement);
-        return matchesSearch && matchesElement;
-    });
-
-    renderCards(filtered);
-}
-
-// Слушатели событий для ввода текста и выбора стихии
-searchInput.addEventListener('input', filterCards);
-elementFilter.addEventListener('change', filterCards);
-
-// Первичная отрисовка при загрузке страницы
-renderCards(cardsDatabase);
